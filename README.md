@@ -1,19 +1,19 @@
-# README.md
+# Title of the Project
 
 ## Core Problem
 
-This Core Problem section outlines the main challenges and objectives addressed in the project.
+[Explain the core problem here]
 
 ## Approach
 
-This section describes the methodology and strategies employed to tackle the core problem of the project.
+[Explain your approach here]
 
-## Architecture
-
-For detailed architecture, refer to [Architecture Diagrams](diagrams/architecture.md).
+[Existing content of README]
 
 ## Key Insight
 
-This section highlights the key insights and findings from the project. 
+[Discussion on the key insight]
 
-Please add any additional information as necessary!
+## Architecture
+
+[Architecture details here]
