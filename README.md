@@ -1,31 +1,55 @@
-# Automotive Distributed Systems Research
+# Automotive Distributed Systems
+
+This repository presents a collection of system-level explorations in modern automotive software, focusing on communication across isolated domains, deterministic system design, and scalable debugging techniques.
+
+---
 
 ## Research Focus
 
-This repository explores system-level challenges in modern automotive distributed systems, particularly:
+Modern automotive platforms integrate multiple operating systems (e.g., RTOS and Linux) on a single SoC under a hypervisor. These systems must coordinate while remaining isolated, creating challenges in communication, timing, and observability.
 
-- Cross-OS communication under hypervisors
-- Deterministic system design in RTOS environments
-- Scalable debugging and log analysis
+This repository investigates:
 
-The goal is to analyze trade-offs between different system architectures and identify opportunities for improving reliability and performance.
+- Cross-OS communication using service-oriented middleware (SOME/IP)
+- Deterministic system behavior through immutable RTOS image design
+- Scalable debugging via automated log analysis
 
-## System Architecture Diagram
+The goal is to analyze trade-offs between architectural choices and identify approaches to improve reliability and performance in safety-critical systems.
+
+---
+
+## System Perspective
+
+This work explores three interconnected layers of automotive systems:
+
+- **Communication** → Cross-domain IPC (SOME/IP, service-oriented design)  
+- **System Design** → Deterministic RTOS behavior and image construction  
+- **Observability** → Log analysis and anomaly detection  
+
+These layers interact to determine overall system reliability:
+
+- Communication affects latency and correctness  
+- System design impacts determinism and safety  
+- Observability enables debugging and validation  
+
+---
+
+## Architecture
 
 ```mermaid
 graph LR
-    subgraph Linux_Guest["Linux Guest (General-purpose OS)"]
+    subgraph Linux_Guest["Linux Guest"]
         A1[Client Application]
         A2[CommonAPI Proxy]
     end
 
     subgraph Virtual_Network["Virtual Ethernet"]
-        V1[Virtual Switch / Bridge]
+        V1[Bridge]
     end
 
-    subgraph RTOS_Guest["RTOS Guest (Real-Time OS)"]
+    subgraph RTOS_Guest["RTOS Guest"]
         B1[CommonAPI Stub]
-        B2[Media / Sensor Service]
+        B2[Service Implementation]
     end
 
     A1 --> A2
@@ -33,59 +57,7 @@ graph LR
     V1 -->|SOME/IP| B1
     B1 --> B2
 
-    B2 -->|Event Notification| B1
+    B2 -->|Event| B1
     B1 -->|SOME/IP| V1
     V1 -->|SOME/IP| A2
     A2 --> A1
-```
-
-See `diagrams/architecture.md` for detailed analysis.
-
-## Topics Covered
-
-### 1. Cross-OS Communication (SOME/IP)
-- Service-oriented IPC between RTOS and Linux guests
-- CommonAPI abstraction
-- Trade-offs vs shared memory
-
-👉 docs/someip-cross-vm.md
-
----
-
-### 2. Immutable RTOS Image Design
-- Deterministic boot
-- Reproducible builds
-- System integrity
-
-👉 docs/rtos-image.md
-
----
-
-### 3. Log Analysis & Automated Detection
-- Pattern-based anomaly detection
-- Heuristic rules for embedded logs
-- Tooling for debugging at scale
-
-👉 docs/log-analysis.md
-
----
-
-## Motivation
-
-Modern automotive systems require reliable communication across isolated domains, deterministic system behavior, and scalable debugging approaches.  
-
-This repository explores these challenges from a system-level perspective.
-
----
-
-## Future Work
-
-- Shared memory IPC vs SOME/IP benchmarking
-- Deterministic scheduling analysis
-- Real-time log monitoring system
-
----
-
-## Author
-
-Embedded systems engineer focused on real-time platforms, automotive middleware, and system reliability.
