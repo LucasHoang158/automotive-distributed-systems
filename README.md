@@ -10,6 +10,37 @@ This repository explores system-level challenges in modern automotive distribute
 
 The goal is to analyze trade-offs between different system architectures and identify opportunities for improving reliability and performance.
 
+## System Architecture Diagram
+
+```mermaid
+graph LR
+    subgraph Linux_Guest["Linux Guest (General-purpose OS)"]
+        A1[Client Application]
+        A2[CommonAPI Proxy]
+    end
+
+    subgraph Virtual_Network["Virtual Ethernet"]
+        V1[Virtual Switch / Bridge]
+    end
+
+    subgraph RTOS_Guest["RTOS Guest (Real-Time OS)"]
+        B1[CommonAPI Stub]
+        B2[Media / Sensor Service]
+    end
+
+    A1 --> A2
+    A2 -->|SOME/IP| V1
+    V1 -->|SOME/IP| B1
+    B1 --> B2
+
+    B2 -->|Event Notification| B1
+    B1 -->|SOME/IP| V1
+    V1 -->|SOME/IP| A2
+    A2 --> A1
+```
+
+See `diagrams/architecture.md` for detailed analysis.
+
 ## Topics Covered
 
 ### 1. Cross-OS Communication (SOME/IP)
