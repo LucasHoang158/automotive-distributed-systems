@@ -1,6 +1,14 @@
 # Automotive Distributed Systems Research
 
-This repository contains a collection of technical explorations in automotive embedded systems, focusing on cross-OS communication, real-time system design, and reliability tooling.
+## Research Focus
+
+This repository explores system-level challenges in modern automotive distributed systems, particularly:
+
+- Cross-OS communication under hypervisors
+- Deterministic system design in RTOS environments
+- Scalable debugging and log analysis
+
+The goal is to analyze trade-offs between different system architectures and identify opportunities for improving reliability and performance.
 
 ## Topics Covered
 
