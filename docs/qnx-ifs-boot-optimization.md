@@ -31,54 +31,51 @@ Before the service binary can even be located — let alone executed. This cause
 
 ### Boot Timeline — Before vs After
 
+<pre>
 Timeline unit: milliseconds (ms) from power-on
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+----------------------------------------------------------------
 
 BEFORE — storage-dependent launch path
-───────────────────────────────────────────────────────────────────
- 0 ms  │ [Power On]
-       │
-       ├──────────── ~1,500 ms ────────────►
-       │  [Storage Driver Init]
-       │    ├─► UFS/eMMC probe & enumeration
-       │    └─► Partition /app mounted
-       │
+----------------------------------------------------------------
+ 0 ms  | [Power On]
+       |
+       +------------ ~1,500 ms ------------>
+       |  [Storage Driver Init]
+       |    +-> UFS/eMMC probe & enumeration
+       |    +-> Partition /app mounted
+       |
 2,356 ms  [boot_script: START]
-       │
-       │   ╔══════════ storage wait bottleneck ══════ ~3,785 ms ═══╗
-       │   ║                                                        ║
-6,141 ms  [Connected Config Service]                               ║
-6,150 ms  [Connected HW Abstraction Layer]                         ║
-6,151 ms  [graphics_context init start]                            ║
-6,165 ms  [early_service_client: START]                            ║
-       │   ╚════════════════════════════════════════════════════════╝
-       │
-6,246 ms  ◄━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FIRST_OUTPUT
-       │                                        (+3,889 ms from boot)
-       │
-14,208 ms ◄━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ OUTPUT_VISIBLE
-                                               (+11,852 ms from boot)
+       |
+       |   ===== storage wait bottleneck (~3,785 ms) =====
+       |
+6,141 ms  [Connected Config Service]
+6,150 ms  [Connected HW Abstraction Layer]
+6,151 ms  [graphics_context init start]
+6,165 ms  [early_service_client: START]
+       |
+6,246 ms  <--------------------------- FIRST_OUTPUT
+       |
+14,208 ms <--------------------------- OUTPUT_VISIBLE
 
 
 AFTER — IFS RAM launch path
-───────────────────────────────────────────────────────────────────
- 0 ms  │ [Power On]
-       │
-       │  [IFS loaded into RAM during kernel init — no storage wait]
-       │
+----------------------------------------------------------------
+ 0 ms  | [Power On]
+       |
+       |  [IFS loaded into RAM — no storage wait]
+       |
 2,207 ms  [boot_script: START]
-2,226 ms  [early_display_service: LAUNCH]   ← from IFS, immediate
-2,227 ms  [early_service_client: LAUNCH]    ← from IFS, immediate
-       │
-2,625 ms  [Connected Config Service]        (+418 ms from boot)
+2,226 ms  [early_display_service: LAUNCH]
+2,227 ms  [early_service_client: LAUNCH]
+       |
+2,625 ms  [Connected Config Service]
 2,640 ms  [graphics_context init start]
-2,642 ms  [Connected HW Abstraction Layer]  (+435 ms from boot)
-2,713 ms  [graphics_context ready]           (+506 ms from boot)
-       │
-2,743 ms  ◄━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ FIRST_OUTPUT
-       │                                          (+536 ms from boot)
-3,528 ms  ◄━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ OUTPUT_VISIBLE
-                                                 (+1,321 ms from boot)
+2,642 ms  [Connected HW Abstraction Layer]
+2,713 ms  [graphics_context ready]
+       |
+2,743 ms  <--------------------------- FIRST_OUTPUT
+       |
+3,528 ms  <--------------------------- OUTPUT_VISIBLE
 
 
 Summary (delta from boot_script START):
@@ -88,9 +85,9 @@ Summary (delta from boot_script START):
 │ FIRST_OUTPUT    │ 3,889 ms  │   536 ms │   ▼ 86%      │
 │ OUTPUT_VISIBLE  │ 11,852 ms │ 1,321 ms │   ▼ 89%      │
 └─────────────────┴───────────┴──────────┴──────────────┘
-
----
-
+</pre>
+ ---
+  
 ## Fix 1 — Relocate Libraries & Binary into IFS
 
 ### What is IFS?
@@ -110,7 +107,7 @@ The fix involves updating the .build.inc IFS image definition to include all dep
 | Early client binary | The early service executable itself |
 
 ### Conceptual build definition
-
+ ```bash
 # Runtime
 [perms=0555] lib64/libRuntimeBase.so    = app/lib/libRuntimeBase.so
 [perms=0555] lib64/libRuntimeOSAL.so   = app/lib/libRuntimeOSAL.so
@@ -131,7 +128,7 @@ The fix involves updating the .build.inc IFS image definition to include all dep
 
 # Binary
 [perms=0555] bin/early_service         = app/bin/early_service
-
+```
 *Result:* The service can now be launched in the *early boot phase*, directly from RAM, without waiting for storage.
 
 ---
@@ -172,7 +169,7 @@ Priority 63 is chosen to:
 ## Fix 3 — Register Dependent Services in Launcher Script
 
 ### The service pipeline
-
+ ```bash
 The display stack is not a single binary — it is a *pipeline* of cooperating processes that must all be available:
 
 [Hardware Abstraction Server]
@@ -182,7 +179,7 @@ The display stack is not a single binary — it is a *pipeline* of cooperating p
 [Frontend Client / Compositor]
         ↓
 [Display Output]
-
+ ```
 ### The problem
 
 The IFS-conditional services (#ifndef __SERVICE_IFS_DISABLE__) were *not registered* in the early launcher configuration. This meant the backend and hardware servers were not started in the early phase — even after moving the client binary to IFS, it had no servers to connect to.
@@ -190,7 +187,7 @@ The IFS-conditional services (#ifndef __SERVICE_IFS_DISABLE__) were *not registe
 ### The fix
 
 Each service is now properly declared in the launcher with:
-
+ ```bash
 static const struct service_action backend_server = {
     .type  = TYPE_CMD,
     .flags = FLAG_BACKGROUND | FLAG_NOCLOSEFD,
@@ -210,7 +207,7 @@ static const struct service_action hw_abstraction_server = {
     .secpol_type = "hw_abstraction_server_t",
     .rmasks = 0x0F,
 };
-
+ ```
 Key attributes explained:
 
 | Attribute | Purpose |
@@ -222,7 +219,7 @@ Key attributes explained:
 | rmasks | CPU affinity mask for NUMA-aware scheduling |
 
 ---
-
+ 
 ## Fix 4 — Security Policy Update
 
 ### QNX MAC system
@@ -316,17 +313,14 @@ These questions sit at the intersection of *real-time systems, formal methods, a
 
 ---
 
-## Author's Anecdote & Snapshot (anonymized)
+## Author's Anecdote & Snapshot
 
 During validation we hit a stubborn regression: an early launch would sometimes silently stall and never produce output. After adding tracing and a short A/B experiment, I discovered the issue was not the client binary but a delayed partition mount that blocked dependent services. The fix required moving a small set of libraries into the boot image and bumping the process priority; the logs in Appendix helped me pinpoint the exact window of delay.
 
-I ran the main validation on an anonymized dev board (SoC-X). I used ./scripts/run_boot_test.sh --profile boot_profile and collected timestamps across 20 cold reboots. The numbers above are averages from that test run. To gather traces I ran tools/trace_collector --start --output traces/boot_trace.json and then looked at the storage-driver window. It was frustrating at first. We were relieved when the results became consistent.
+I ran the main validation on a dev board (SoC-X). I used ./scripts/run_boot_test.sh --profile boot_profile and collected timestamps across 20 cold reboots. The numbers above are averages from that test run. To gather traces I ran tools/trace_collector --start --output traces/boot_trace.json and then looked at the storage-driver window. It was frustrating at first. We were relieved when the results became consistent.
 
-An anonymized commit (hash truncated) that implemented the IFS move and priority change:
+A commit that implemented the IFS move and priority change:
 
-commit 0a1b2c3d... (anonymized)
-Author: Build Engineer <anon@example.com>
-Date: 2026-02-10
 
     Move runtime libs to IFS and set early service priority to 63
 
@@ -334,13 +328,6 @@ Date: 2026-02-10
     - Update launcher to start early service from IFS
     - Launch with -p 63 under secpol label
 
-
-Caption: Anonymized commit implementing the IFS relocation and priority tuning.
-
-"One small change made boot times stable. That felt great."
-
-
-![Boot timeline placeholder](images/boot_timeline.svg)
 
 ---
 
@@ -354,10 +341,10 @@ Caption: Anonymized commit implementing the IFS relocation and priority tuning.
 
 ---
 
-## Appendix — Anonymized Boot Timing Logs
+## Appendix —  Boot Timing Logs
 
-The following logs were captured via the platform boot event tracing subsystem. All service names, binary names, and component identifiers have been replaced with generic equivalents.
-
+ The following bmetrics logs were captured via the platform boot event tracing subsystem.
+ ```bash
 *Before (storage-dependent launch path):*
 
 2341237[us]: boot_script: LAUNCH
@@ -381,24 +368,25 @@ The following logs were captured via the platform boot event tracing subsystem. 
 13824026[us]: early_service - renderer init end - output_thread: INTERMEDIATE
 13826101[us]: early_service - renderer ready - output_thread: INTERMEDIATE
 14207876[us]: early_service - OUTPUT_VISIBLE: INTERMEDIATE        ◄── 11851 ms from boot_script
+```
 
 *After (IFS RAM launch path):*
-
+ ```bash
 2207052[us]: boot_script: START
 2226034[us]: early_display_service: LAUNCH
 2227041[us]: early_service_client: LAUNCH
-
-Local debug session (anonymized):
+```
+Local debug session:
 
 ```bash
-$ ./scripts/run_boot_test.sh --profile boot_profile --count 20
-# output saved to traces/boot_trace.json
-# sample lines (anonymized):
+
+
 2356191[us]: boot_script: START
 6245596[us]: early_service - FIRST_OUTPUT
 14207876[us]: early_service - OUTPUT_VISIBLE
 
-I ran these tests from an Ubuntu 20.04 dev host connected to an anonymized SoC-X board. Each cold reboot run took about ~3 minutes. I nearly blamed the renderer at first. I was wrong.
+I ran these tests from an Ubuntu 20.04 dev host connected to an SoC-X board. Each cold reboot run took about ~3 minutes. I nearly blamed the renderer at first. I was wrong.
+
 2605916[us]: early_service - init_service cold_boot: INTERMEDIATE
 2606161[us]: early_service - start_service: INTERMEDIATE
 2606283[us]: early_service - Connecting Config Service: INTERMEDIATE
@@ -422,4 +410,4 @@ I ran these tests from an Ubuntu 20.04 dev host connected to an anonymized SoC-X
 
 ---
 
-This post describes general embedded systems engineering concepts and techniques. All implementation details, binary names, service names, and timing figures have been anonymized to avoid disclosure of proprietary information.
+This post describes general embedded systems engineering concepts and techniques.
