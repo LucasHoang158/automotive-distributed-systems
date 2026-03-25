@@ -1,109 +1,61 @@
-# Automotive Distributed Systems (QNX + Android)
+# Automotive Distributed Systems (QNX Camera-Oriented Experiments)
 
-This repo comes from a simple but annoying problem I kept hitting while working on an automotive platform:
+## Overview
 
-Things look fine in isolation, but once QNX and Android run together under a hypervisor, timing and behavior become unpredictable.
+This repository is a collection of experiments related to building an automotive application on QNX.
 
----
+The main target is a **camera-like system**.  
+Each topic in this repo explores one aspect of the system, such as:
+- communication
+- process separation
+- rendering
+- data flow
 
-## What this is about
+These parts are not fully integrated yet.  
+They are small steps toward a larger system.
 
-The system I worked on has:
+## Motivation
 
-- QNX (real-time, safety-critical)
-- Android (UI, applications)
-- A hypervisor separating the two
+Modern automotive systems are becoming more complex.  
+Applications like camera or ADAS are no longer a single process.
 
-They share the same SoC, but not the same assumptions.
+They involve:
+- multiple modules
+- data pipelines
+- communication between components
 
-That’s where problems start.
+On QNX, this often means:
+- multi-process design
+- strict performance constraints
 
----
+This repo is used to explore these ideas in a simple and controlled way.
 
-## The real problem
+## Structure
 
-Not performance. Not features.
+Each folder represents one idea or experiment.
 
-**Determinism.**
+Examples:
+- communication using vsomeip
+- simple service interaction
+- process-level separation
+- basic pipeline behavior
 
-- A service starts “early” — but actually waits for storage  
-- A message is “fast” — until Android gets busy  
-- A system “works” — but you can’t explain why it failed once  
+They are loosely connected.  
+All of them move toward the same goal: a camera system.
 
-This repo is about understanding and fixing those kinds of problems.
+## System Direction
 
----
-
-## What I explored
-
-Instead of one big solution, I ended up working on three different layers:
-
-### 1. Boot timing (QNX side)
-
-Moving critical services into IFS changed boot behavior completely.
-
-Not just faster — **predictable**.
-
-→ docs/qnx-ifs-boot-optimization.md
-
----
-
-### 2. QNX ↔ Android interface
-
-Tried different approaches. Some looked clean on paper, but broke under load.
-
-Ended up with a design that favors:
-
-- non-blocking behavior
-- strict validation
-- explicit state handling
-
-→ docs/qnx-android-interface-architecture.md
-
----
-
-### 3. Debugging reality (logs)
-
-A lot of issues never show up as “failures”.
-
-They sit in logs.
-
-So I built a small detector to surface patterns automatically.
-
-→ docs/robotframework-log-detection.md
-
----
-
-## How these connect
-
-Boot timing → affects when services exist
-
-Communication → affects how they interact
-
-Logs → explain when things go wrong
+The target system can be seen like this:
+Camera Input → Processing → Rendering → Output
 
 
-None of them works alone.
+Each stage may run in a separate process.
 
----
+Communication between stages is done using middleware (e.g. vsomeip).
 
-## Why this matters
+## Technologies
 
-In automotive systems:
-
-- You don’t just need it to work  
-- You need it to behave the same way every time  
-
-That’s much harder than it sounds once multiple OSes are involved.
-
----
-
-## Notes
-
-All details are anonymized, but the problems and solutions are real.
-
----
-
-## Author
-
-Embedded engineer working on Linux, QNX, Android, and system integration.
+- C++
+- QNX (target environment)
+- vsomeip (for communication)
+- EGL (for rendering, in some parts)
