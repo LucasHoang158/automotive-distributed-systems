@@ -2,7 +2,7 @@
 
 **Tags:** `QNX` `Android` `Automotive` `Middleware` `Inter-OS Communication` `Security` `Real-Time` `System Integration`
 
-**Date:** March 2026
+**Date:** August 2025
 
 **Author:** Automotive Embedded Software Engineer
 
