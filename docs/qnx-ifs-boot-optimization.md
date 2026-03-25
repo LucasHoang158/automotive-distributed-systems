@@ -2,7 +2,7 @@
 
 **Tags:** `QNX` `Embedded Systems` `Automotive` `ADAS` `RTOS` `Boot Optimization` `System Programming` `Real-Time` `Safety Critical`
 
-**Date:** March 2026
+**Date:** November 2025
 
 **Author:** Automotive Embedded Software Engineer
 
