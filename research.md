@@ -1,73 +1,151 @@
 # Research Notes
 
-This is not a formal research project (yet), but a set of questions that came out of real system work.
+## 1. Background
 
----
+Automotive software is becoming more complex, especially for applications like camera systems.
 
-## 1. Boot-time determinism
+A typical camera system is not a single program.  
+It includes several parts:
+- data input from sensor
+- processing pipeline
+- rendering to display
+- communication with other components
 
-I ran into a case where a “fast” service was actually delayed by storage.
+In modern systems, these parts are often separated into different processes.
 
-Moving it into IFS fixed it.
+On QNX, this approach is common because it improves:
+- isolation
+- stability
+- maintainability
 
-That raises a bigger question:
+## 2. Problem Statement
 
-- Can we reason about boot timing *before* running the system?
+Building a full camera system directly is difficult.
 
-Right now, most of it is trial-and-error.
+Some challenges:
+- communication between processes
+- data flow management
+- latency between stages
+- system complexity grows quickly
 
----
+At the same time, using a full framework (like AUTOSAR Adaptive) is heavy and hard to study.
 
-## 2. Cross-OS communication
+So there is a gap:
+- simple examples are too small
+- real systems are too complex
 
-QNX and Android behave very differently.
+## 3. Research Approach
 
-- QNX expects determinism  
-- Android does not guarantee it  
+This project takes a step-by-step approach.
 
-So any interface between them becomes a weak point.
+Instead of building a full system:
+- each part is explored separately
+- each topic focuses on one idea
 
-Question:
+Examples of topics:
+- inter-process communication using vsomeip
+- simple service interaction
+- basic pipeline structure
+- process-level separation
 
-- Can we bound latency across OS boundaries?
+These experiments are not fully connected, but they follow the same direction.
 
----
+## 4. System View
 
-## 3. IPC trade-offs
+The reference system is a camera pipeline:
+Input → Processing → Rendering
 
-Tried multiple approaches:
 
-- sockets → simple but sometimes slow  
-- shared memory → fast but tricky  
+Each stage can run as a separate process.
 
-There is no perfect solution.
+Communication between stages can use:
+- message passing
+- service-oriented communication
 
-So:
+This creates a distributed behavior, even on a single machine.
 
-- Can we combine both without making the system messy?
+## 5. Key Questions
 
----
+This research tries to answer some practical questions:
 
-## 4. Observability
+- How should modules communicate in a QNX system?
+- What is the cost of process separation?
+- How much latency is added by middleware?
+- How tightly should modules be coupled?
 
-Most failures I saw:
+These questions are important for real automotive systems.
 
-- didn’t crash  
-- didn’t throw errors  
-- just… behaved wrong  
+## 6. Design Choices
 
-Logs were the only clue.
+### Multi-process model
 
-Question:
+Each module runs independently.
 
-- Can logs be turned into something closer to a “signal” instead of noise?
+Reason:
+- closer to real system design
+- better isolation
+- easier to test individual parts
 
----
+### Use of vsomeip
 
-## Direction
+vsomeip is used in some experiments.
 
-All of this points to one idea:
+Reason:
+- common in automotive systems
+- supports service-based communication
+- simple enough to experiment with
 
-Determinism is not a property of a single component.
+### Incremental development
 
-It’s a property of the whole system.
+The system is not built all at once.
+
+Instead:
+- small parts are tested first
+- integration comes later
+
+## 7. Observations (Early Stage)
+
+From initial experiments, some points can be seen:
+
+- communication between processes is not free
+- message-based systems add overhead
+- simple designs are easier to debug
+
+Even basic setups already show:
+- latency between modules
+- dependency between components
+
+## 8. Limitations
+
+Current work has some limitations:
+
+- no full pipeline yet
+- limited synchronization between modules
+- no strict timing control
+- no fault handling
+
+This is expected at this stage.
+
+## 9. Future Work
+
+Next steps may include:
+
+- connect all modules into one pipeline
+- measure latency across stages
+- compare different communication methods
+- test on real QNX target
+- add basic fault scenarios
+
+## 10. Conclusion
+
+This project is not about building a final product.
+
+It is about understanding how a real system can be built.
+
+By splitting the problem into smaller parts,  
+it becomes easier to study and improve each part.
+
+This work can be a base for:
+- deeper system design
+- performance evaluation
+- future research (PhD level)
