@@ -1,61 +1,125 @@
-# Automotive Distributed Systems (QNX Camera-Oriented Experiments)
+# Automotive Distributed Systems
 
 ## Overview
 
-This repository is a collection of experiments related to building an automotive application on QNX.
+This repository explores the design of modern automotive software systems as **distributed systems running on embedded operating systems**.
 
-The main target is a **camera-like system**.  
-Each topic in this repo explores one aspect of the system, such as:
-- communication
-- process separation
-- rendering
-- data flow
+The work is centered around a **camera-oriented pipeline** (similar to IVI / ADAS systems), implemented through a series of experiments on QNX and Linux-based environments.
 
-These parts are not fully integrated yet.  
-They are small steps toward a larger system.
+Rather than building a monolithic application, this repository investigates:
+
+- distributed communication between components
+- multi-process system design
+- data flow across system boundaries
+- OTA (Over-The-Air) update mechanisms
+- system reliability under failure conditions
+
+---
 
 ## Motivation
 
-Modern automotive systems are becoming more complex.  
-Applications like camera or ADAS are no longer a single process.
+Modern automotive systems (e.g., camera, IVI, ADAS) are no longer single processes.
 
-They involve:
-- multiple modules
-- data pipelines
-- communication between components
+They are **distributed, concurrent, and safety-critical systems** composed of:
 
-On QNX, this often means:
-- multi-process design
-- strict performance constraints
+- multiple processes
+- asynchronous communication
+- real-time constraints
+- strict reliability requirements
 
-This repo is used to explore these ideas in a simple and controlled way.
+This repository is a step toward understanding and designing such systems from both:
 
-## Structure
+- **distributed systems perspective**
+- **operating system (Linux/QNX) perspective**
 
-Each folder represents one idea or experiment.
-
-Examples:
-- communication using vsomeip
-- simple service interaction
-- process-level separation
-- basic pipeline behavior
-
-They are loosely connected.  
-All of them move toward the same goal: a camera system.
+---
 
 ## System Direction
 
-The target system can be seen like this:
+The target system follows a pipeline architecture:
+
 Camera Input → Processing → Rendering → Output
 
+Each stage is designed as an independent process.
 
-Each stage may run in a separate process.
+Communication between components is handled through middleware (e.g., vsomeip) or system-level interfaces.
 
-Communication between stages is done using middleware (e.g. vsomeip).
+---
+
+## Repository Structure
+
+Each directory represents a focused experiment:
+
+- communication (e.g., vsomeip-based interaction)
+- process separation (multi-process design)
+- rendering (EGL-based output)
+- data flow (pipeline behavior)
+
+These components are intentionally loosely coupled, allowing exploration of individual system concerns.
+
+---
+
+## Key Concepts Explored
+
+### 1. Distributed Systems in Automotive
+
+- system modeled as interacting nodes
+- asynchronous communication (CAN, REST, middleware)
+- eventual consistency of system state
+
+### 2. OTA Update Systems
+
+- formal state machine (FSM)
+- safety invariants and correctness
+- fault handling and recovery
+
+### 3. Linux / QNX System Perspective
+
+- process lifecycle and scheduling
+- concurrency and synchronization
+- file system consistency and atomic updates
+
+---
 
 ## Technologies
 
-- C++
-- QNX (target environment)
-- vsomeip (for communication)
-- EGL (for rendering, in some parts)
+- **C++**
+- **QNX (target embedded OS)**
+- **Linux (system-level experiments)**
+- **vsomeip (middleware communication)**
+- **EGL (rendering pipeline)**
+
+---
+
+## Research Direction
+
+This repository evolves toward a unified research theme:
+
+> **Distributed Systems for Automotive under OS-Level Constraints**
+
+It combines:
+
+- distributed coordination
+- real-time constraints
+- fault tolerance
+- operating system behavior
+
+See [`research.md`](./research.md) for a formal research perspective.
+
+---
+
+## Status
+
+This is an **ongoing experimental repository**.
+
+The components are not fully integrated yet.  
+Each module is a step toward a larger system.
+
+---
+
+## Future Work
+
+- fault-tolerant OTA system design
+- formal verification (FSM, invariants)
+- integration of distributed pipeline
+- real-time scheduling analysis
