@@ -1,4 +1,9 @@
 # Automotive Systems as Distributed Systems: A Formal Perspective
+**Tags:** `QNX` `Android` `Automotive` `Middleware` `Inter-OS Communication` `Security` `Real-Time` `System Integration`
+
+**Date:** December 2023
+
+**Author:** Automotive Embedded Software Engineer
 
 ## Abstract
 Modern vehicles are evolving into distributed cyber-physical systems composed of heterogeneous compute nodes communicating over mixed-criticality networks. This article formalizes automotive architectures—focusing on IVI and OTA subsystems—using distributed systems theory. We define a system model, communication abstractions, and consistency/failure properties, and derive design implications for reliable OTA pipelines under real-time constraints.
