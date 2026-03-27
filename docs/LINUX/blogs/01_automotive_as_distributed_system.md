@@ -111,7 +111,7 @@ Assumptions:
 1. **No installation before download completes**
 
 $$
-state = INSTALLING \Rightarrow download\_complete = true
+state = INSTALLING \Rightarrow download-complete = true
 $$
 
 ---
@@ -119,7 +119,7 @@ $$
 2. **Single active update**
 
 $$
-\forall t:\; |active\_updates(t)| \le 1
+\forall t:\; |active-updates(t)| \le 1
 $$
 
 ---
