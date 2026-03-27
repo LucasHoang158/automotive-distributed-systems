@@ -1,151 +1,141 @@
-# Research Notes
+# Research Direction: Distributed Systems for Automotive
 
-## 1. Background
+## Abstract
 
-Automotive software is becoming more complex, especially for applications like camera systems.
+This repository investigates automotive software systems as **distributed systems operating under operating system constraints**. The focus is on OTA mechanisms, camera pipelines, and inter-process communication, with experiments conducted on QNX and Linux environments.
 
-A typical camera system is not a single program.  
-It includes several parts:
-- data input from sensor
-- processing pipeline
-- rendering to display
-- communication with other components
+---
 
-In modern systems, these parts are often separated into different processes.
+## 1. Problem Statement
 
-On QNX, this approach is common because it improves:
-- isolation
-- stability
-- maintainability
+Modern automotive systems (IVI, ADAS, camera systems) exhibit characteristics of:
 
-## 2. Problem Statement
+- distributed systems
+- real-time systems
+- safety-critical systems
 
-Building a full camera system directly is difficult.
+However, their design is often fragmented across:
 
-Some challenges:
-- communication between processes
-- data flow management
-- latency between stages
-- system complexity grows quickly
+- application-level logic
+- middleware communication
+- operating system behavior
 
-At the same time, using a full framework (like AUTOSAR Adaptive) is heavy and hard to study.
+This research aims to **unify these layers into a coherent system model**.
 
-So there is a gap:
-- simple examples are too small
-- real systems are too complex
+---
 
-## 3. Research Approach
+## 2. System Model
 
-This project takes a step-by-step approach.
+We model the automotive system as:
 
-Instead of building a full system:
-- each part is explored separately
-- each topic focuses on one idea
+$$
+\mathcal{S} = (N, C, \Sigma, T)
+$$
 
-Examples of topics:
-- inter-process communication using vsomeip
-- simple service interaction
-- basic pipeline structure
-- process-level separation
+Where:
 
-These experiments are not fully connected, but they follow the same direction.
+- $N$: set of nodes (ECUs, IVI units, HMI)
+- $C$: communication channels (CAN, middleware, REST)
+- $\Sigma$: global system state space
+- $T$: state transition relation
 
-## 4. System View
+---
 
-The reference system is a camera pipeline:
-Input → Processing → Rendering
+## 3. OTA as a Distributed System
 
+OTA updates are modeled as a **finite state machine (FSM)**:
 
-Each stage can run as a separate process.
+States:
+- IDLE
+- AVAILABLE
+- DOWNLOADING
+- DOWNLOADED
+- INSTALLING
+- SUCCESS
+- FAILED
 
-Communication between stages can use:
-- message passing
-- service-oriented communication
+Key properties:
 
-This creates a distributed behavior, even on a single machine.
+### Safety
+- no installation before download completes
+- no invalid state transitions
 
-## 5. Key Questions
+### Liveness
+- system eventually reaches SUCCESS or FAILED
 
-This research tries to answer some practical questions:
+---
 
-- How should modules communicate in a QNX system?
-- What is the cost of process separation?
-- How much latency is added by middleware?
-- How tightly should modules be coupled?
+## 4. Fault Model
 
-These questions are important for real automotive systems.
+Failures are categorized as:
 
-## 6. Design Choices
+### Non-Fatal
+- recoverable
+- retry-based handling
 
-### Multi-process model
+### Fatal
+- system-critical
+- require rollback or manual intervention
 
-Each module runs independently.
+This aligns with distributed system fault models:
 
-Reason:
-- closer to real system design
-- better isolation
-- easier to test individual parts
+- crash faults
+- omission faults
+- timing faults
 
-### Use of vsomeip
+---
 
-vsomeip is used in some experiments.
+## 5. Linux / QNX System Perspective
 
-Reason:
-- common in automotive systems
-- supports service-based communication
-- simple enough to experiment with
+Distributed correctness depends on OS-level behavior:
 
-### Incremental development
+### Process Model
+- multi-process architecture
+- thread-based concurrency
 
-The system is not built all at once.
+### File System
+- atomic updates
+- crash consistency
 
-Instead:
-- small parts are tested first
-- integration comes later
+### I/O
+- CAN (SocketCAN)
+- network stack (REST/WebSocket)
 
-## 7. Observations (Early Stage)
+---
 
-From initial experiments, some points can be seen:
+## 6. Cross-Layer Insight
 
-- communication between processes is not free
-- message-based systems add overhead
-- simple designs are easier to debug
+A key observation:
 
-Even basic setups already show:
-- latency between modules
-- dependency between components
+> System correctness emerges from the interaction between distributed coordination and OS-level guarantees.
 
-## 8. Limitations
+Examples:
 
-Current work has some limitations:
+- FSM correctness depends on process execution
+- update safety depends on file system behavior
+- fault recovery depends on OS restart mechanisms
 
-- no full pipeline yet
-- limited synchronization between modules
-- no strict timing control
-- no fault handling
+---
 
-This is expected at this stage.
+## 7. Research Contributions (Ongoing)
 
-## 9. Future Work
+This repository contributes:
 
-Next steps may include:
+- a system-level view of automotive OTA
+- formal modeling of update processes
+- integration of distributed and OS-level perspectives
 
-- connect all modules into one pipeline
-- measure latency across stages
-- compare different communication methods
-- test on real QNX target
-- add basic fault scenarios
+---
 
-## 10. Conclusion
+## 8. Future Research Directions
 
-This project is not about building a final product.
+- formal verification (LTL, TLA+)
+- fault-tolerant state machines
+- real-time scheduling constraints
+- end-to-end system validation
 
-It is about understanding how a real system can be built.
+---
 
-By splitting the problem into smaller parts,  
-it becomes easier to study and improve each part.
+## 9. Conclusion
 
-This work can be a base for:
-- deeper system design
-- performance evaluation
-- future research (PhD level)
+Automotive systems should be treated as **distributed systems constrained by operating system behavior**. A unified approach is required to ensure correctness, reliability, and scalability.
