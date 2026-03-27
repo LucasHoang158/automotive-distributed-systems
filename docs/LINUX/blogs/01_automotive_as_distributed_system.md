@@ -22,16 +22,16 @@ We study a system comprising nodes {HU1, HU3, HMI} interacting via CAN (low-leve
 
 We define the system as:
 
-\[
+$$
 \mathcal{S} = (N, C, \Sigma, T)
-\]
+$$
 
 Where:
-- \(N\): set of nodes
-- \(C\): communication channels (CAN, RSI)
-- \(\Sigma\): global system states
-- \(T\): transition relation
 
+- $N$: set of nodes  
+- $C$: communication channels (e.g., CAN, RSI)  
+- $\Sigma$: global system state space  
+- $T$: transition relation between states  
 ---
 
 ### 2.2 Communication Channels
@@ -53,21 +53,21 @@ Where:
 
 ## 3. Formal State Representation
 
-Each node \( n_i \in N \) maintains a local state \( s_i \in \Sigma_i \)
+Each node $n_i \in N$ maintains a local state $s_i \in \Sigma_i$.
 
-Global state:
+The global system state is defined as:
 
-\[
+$$
 \Sigma = \Sigma_{HU1} \times \Sigma_{HU3} \times \Sigma_{HMI}
-\]
+$$
 
 Consistency condition:
 
-\[
-\forall i,j: f(s_i) = f(s_j)
-\]
+$$
+\forall i, j: f(s_i) = f(s_j)
+$$
 
-Where \( f \) is a projection over update state.
+where $f$ is a projection function over the update state.
 
 ---
 
@@ -105,21 +105,25 @@ Assumptions:
 
 1. No installation before download completes:
 
-\[
-\neg (INSTALLING \land \text{download_complete} = false)
-\]
+$$
+\neg (state = INSTALLING \land download\_complete = false)
+$$
 
-2. Single active update:
+---
 
-\[
-\forall t: |active_updates(t)| \le 1
-\]
+2. **Single active update**
 
-3. Monotonic progression:
+$$
+\forall t:\ |active\_updates(t)| \le 1
+$$
 
-\[
+---
+
+3. **Monotonic progression**
+
+$$
 state_{t+1} \ge state_t
-\]
+$$
 
 ---
 
