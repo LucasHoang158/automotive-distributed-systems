@@ -25,6 +25,23 @@ stateDiagram-v2
 
     FAILED --> AVAILABLE
 ```
+--- 
+## Extended State Machine with Guards
+```mermaid
+stateDiagram-v2
+    [*] --> IDLE
+
+    IDLE --> AVAILABLE
+    AVAILABLE --> DOWNLOADING
+    DOWNLOADING --> DOWNLOADED
+
+    DOWNLOADED --> INSTALLING : if download_complete && battery_ok && stationary
+
+    INSTALLING --> SUCCESS
+    INSTALLING --> FAILED
+
+    FAILED --> AVAILABLE
+```
 ## Failure-aware Transitions
 
 ```mermaid
