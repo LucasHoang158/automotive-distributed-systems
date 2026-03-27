@@ -10,7 +10,7 @@ Instead, it is split into multiple small experiments.
 Each experiment represents one part of the system.
 
 ## Target Architecture (Concept)
-
+````bash
 +-------------------+
 | Camera Input |
 +-------------------+
@@ -27,7 +27,7 @@ v
 | (EGL / Display) |
 +-------------------+
 
-
+````
 In a real system, each block can run in a separate process.
 
 ## Current Implementation Style
