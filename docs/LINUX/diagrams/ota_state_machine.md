@@ -1,9 +1,6 @@
 
 ---
 
-# 📄 `diagrams/ota_state_machine.md` (fixed)
-
-```md
 # OTA State Machine (Formal Model)
 
 ## Overview
@@ -28,31 +25,55 @@ stateDiagram-v2
 
     FAILED --> AVAILABLE
 ```
-Failure-aware Transitions
+## Failure-aware Transitions
 
-Properties
-Determinism
+```mermaid
+stateDiagram-v2
+    [*] --> IDLE
 
-Each state has well-defined transitions.
+    DOWNLOADING --> FAILED : network_error
+    INSTALLING --> FAILED : install_error
 
-Safety
+    FAILED --> AVAILABLE : retry
+```
+
+---
+
+## Properties
+
+### Determinism
+
+Each state has well-defined outgoing transitions.
+
+---
+
+### Safety
 
 Invalid transitions are not allowed.
 
-Liveness
+---
 
-The system eventually reaches:
+### Liveness
 
-SUCCESS, or
-FAILED
-Design Insight
-FSM provides explicit control flow
-Enables verification of valid transitions
-Supports idempotent retry mechanisms
-Implications
+The system eventually reaches a terminal state:
+
+- SUCCESS  
+- FAILED  
+
+---
+
+## Design Insight
+
+- FSM provides explicit control flow
+- Enables verification of valid transitions
+- Supports idempotent retry mechanisms
+
+---
+
+## Implications
 
 The OTA process can be analyzed as a transition system, enabling:
 
-correctness reasoning
-fault recovery strategies
-system validation
+- correctness reasoning
+- fault recovery strategies
+- system validation
