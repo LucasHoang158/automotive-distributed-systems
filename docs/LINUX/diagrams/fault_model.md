@@ -1,9 +1,5 @@
 
 ---
-
-# 📄 `diagrams/fault_model.md` (fixed)
-
-```md
 # Fault Model for Automotive OTA Systems
 
 ## Overview
@@ -28,57 +24,78 @@ graph TD
     FT --> E[ECU Crash]
     FT --> U[Update Corruption]
 ```
-Failure Types
-Non-Fatal Failures
 
-Characteristics:
+## Failure Types
 
-Temporary
-Recoverable
+### Non-Fatal Failures
 
-Examples:
+**Characteristics:**
+- Temporary
+- Recoverable
 
-Battery low
-Charging state
-Unsafe vehicle condition
+**Examples:**
+- Battery low
+- Charging state
+- Unsafe vehicle condition
 
-Handling:
+**Handling:**
+- Pause execution
+- Retry after recovery
 
-Pause execution
-Retry after recovery
-Fatal Failures
+---
 
-Characteristics:
+### Fatal Failures
 
-Critical
-Not recoverable at runtime
+**Characteristics:**
+- Critical
+- Not recoverable at runtime
 
-Examples:
+**Examples:**
+- ECU crash
+- Corrupted update package
 
-ECU crash
-Corrupted update package
+**Handling:**
+- Abort process
+- Require manual intervention
 
-Handling:
+---
 
-Abort process
-Require manual intervention
-Failure Timeline
+## Failure Timeline
 
-Design Implications
-Distinguish between recoverable and unrecoverable faults
-Support retry for non-fatal failures
-Enforce safe abort for fatal failures
-Distributed System Perspective
+```mermaid
+sequenceDiagram
+    participant HU3
+    participant System
 
-This fault model aligns with:
+    HU3->>System: Start Installation
+    System-->>HU3: Battery Low
+    HU3->>HU3: Pause
+    HU3->>System: Retry
+```
+---
 
-Crash faults
-Omission faults
-Timing faults
-Conclusion
+## Design Implications
+
+- Distinguish between recoverable and unrecoverable faults
+- Support retry for non-fatal failures
+- Enforce safe abort for fatal failures
+
+---
+
+## Distributed System Perspective
+
+This fault model aligns with classical distributed system failure types:
+
+- Crash faults
+- Omission faults
+- Timing faults
+
+---
+
+## Conclusion
 
 A well-defined fault model is essential for:
 
-reliable OTA systems
-predictable system behavior
-safe recovery strategies
+- Reliable OTA systems
+- Predictable system behavior
+- Safe recovery strategies
