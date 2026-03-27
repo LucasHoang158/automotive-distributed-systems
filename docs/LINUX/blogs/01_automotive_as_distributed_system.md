@@ -108,10 +108,10 @@ Assumptions:
 
 ## 6. Invariants (Safety Properties)
 
-1. No installation before download completes:
+1. **No installation before download completes**
 
 $$
-\neg (state = INSTALLING \land download\_complete = false)
+state = INSTALLING \Rightarrow download\_complete = true
 $$
 
 ---
@@ -119,18 +119,16 @@ $$
 2. **Single active update**
 
 $$
-\forall t:\ |active\_updates(t)| \le 1
+\forall t:\; |active\_updates(t)| \le 1
 $$
 
 ---
 
-3. **Monotonic progression**
+3. **Valid state transitions**
 
 $$
-state_{t+1} \ge state_t
+(state_t, state_{t+1}) \in T
 $$
-
----
 
 ## 7. Architecture Diagram
 
