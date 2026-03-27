@@ -1,82 +1,168 @@
-# ⚙️ Blog 2
-## ota_state_machine_design.md
-
-```md
-# Designing a State Machine for OTA Systems in Automotive
+# Designing a Formal State Machine for Automotive OTA Systems
 
 ## Abstract
-OTA update systems require precise control over system states. This article presents a formalized state machine approach for automotive OTA updates.
+OTA update systems require precise coordination across distributed nodes. This article presents a formal state machine model for automotive OTA systems, including transitions, invariants, and correctness properties.
 
 ---
 
-## 1. Introduction
+## 1. Problem Statement
 
-OTA updates involve multiple stages:
-- Download
-- Verification
-- Installation
+OTA systems must ensure:
+- correctness under failure
+- deterministic transitions
+- safe execution under constraints
 
-Each stage must be deterministic and recoverable.
-
----
-
-## 2. State Machine Model
-
-### Core States
-
-- IDLE (0x01)
-- AVAILABLE (0x02)
-- DOWNLOADING (0x06)
-- DOWNLOADED (0x07)
-- INSTALLING (0x0D)
-- SUCCESS (0x0F)
-- FAILED (0x0E)
+We model OTA as a **Finite State Machine (FSM)**.
 
 ---
 
-## 3. Transition Design
+## 2. State Definition
 
-Transitions must satisfy:
-- Determinism
-- Idempotency
-- Recoverability
+Let the set of states be:
 
-Example:
-````
+S = {IDLE, AVAILABLE, DOWNLOADING, DOWNLOADED, INSTALLING, SUCCESS, FAILED}
 
-AVAILABLE → DOWNLOADING → DOWNLOADED → INSTALLING → SUCCESS
+---
 
+## 3. Transition System
+
+We define transitions as a relation:
+
+T ⊆ S × S
+
+Core transitions:
+
+- IDLE → AVAILABLE  
+- AVAILABLE → DOWNLOADING  
+- DOWNLOADING → DOWNLOADED  
+- DOWNLOADED → INSTALLING  
+- INSTALLING → SUCCESS  
+- INSTALLING → FAILED  
+- FAILED → AVAILABLE  
+
+---
+
+## 4. State Machine Diagram
+
+```mermaid
+stateDiagram-v2
+    [*] --> IDLE
+    IDLE --> AVAILABLE
+    AVAILABLE --> DOWNLOADING
+    DOWNLOADING --> DOWNLOADED
+    DOWNLOADED --> INSTALLING
+    INSTALLING --> SUCCESS
+    INSTALLING --> FAILED
+    FAILED --> AVAILABLE
 ```
 
----
+## 5. Guard Conditions
 
-## 4. Exception States
+State transitions are constrained by **preconditions (guards)** to ensure safety.
 
-Non-fatal:
-- Low battery
-- Parking active
+The transition to `INSTALLING` is allowed only if:
 
-Fatal:
-- ECU failure
-- Update corruption
+- `download_complete = true`
+- `battery_ok = true`
+- `vehicle_stationary = true`
 
----
-
-## 5. Formalization Perspective
-
-This state machine can be modeled as:
-- Finite State Machine (FSM)
-- Transition system
-
-Future work:
-- TLA+
-- Model checking
+These guards enforce that installation occurs only under safe and valid system conditions.
 
 ---
 
-## 6. Conclusion
+## 6. Invariants
 
-A well-defined state machine is essential for ensuring correctness in OTA systems, particularly under failure conditions.
-```
+The system must satisfy the following invariants at all times:
+
+### 6.1 Installation Requires Download
+
+INSTALLING ⇒ DOWNLOADED
+
+A system must never enter the INSTALLING state unless the update has been fully downloaded.
 
 ---
+
+### 6.2 Single Active Update
+
+|active_updates| ≤ 1
+
+At any time, only one update process may be active to avoid state conflicts.
+
+---
+
+### 6.3 Valid Transitions Only
+
+(s_i, s_j) ∈ T
+
+All state transitions must belong to the predefined transition set T.
+
+---
+
+## 7. Idempotency
+
+State transitions must be **idempotent**, meaning repeated execution does not alter correctness.
+
+- Re-triggering `INSTALLING` must not corrupt system state
+- Retry operations must preserve consistency
+
+This property is essential for handling retries and partial failures.
+
+---
+
+## 8. Failure Handling
+
+### 8.1 Non-Fatal Failures
+
+Examples:
+- Battery low
+- Charging active
+- Parking condition violated
+
+**Handling strategy:**
+- Pause or rollback state
+- Allow retry after condition recovery
+
+---
+
+### 8.2 Fatal Failures
+
+Examples:
+- ECU crash
+- Corrupted update package
+
+**Handling strategy:**
+- Abort update process
+- Require manual intervention (e.g., workshop recovery)
+
+---
+
+## 9. Correctness Properties
+
+### 9.1 Safety
+
+The system must never reach an invalid or undefined state.
+
+---
+
+### 9.2 Liveness
+
+The system must eventually reach a terminal state:
+
+- SUCCESS, or
+- FAILED
+
+This guarantees that the update process does not stall indefinitely.
+
+---
+
+## 10. Design Implications
+
+- Finite State Machines simplify reasoning and debugging
+- Enable future formal verification (e.g., model checking)
+- Provide structured recovery mechanisms for failure scenarios
+
+---
+
+## 11. Conclusion
+
+A formally defined state machine is essential for designing reliable OTA systems in distributed automotive environments. It ensures correctness, supports robust failure handling, and establishes a foundation for formal verification.
