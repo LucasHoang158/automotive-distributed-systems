@@ -1,5 +1,9 @@
 # Designing a Formal State Machine for Automotive OTA Systems
+**Tags:** `QNX` `Android` `Automotive` `Middleware` `Inter-OS Communication` `Security` `Real-Time` `System Integration`
 
+**Date:** March 2024
+
+**Author:** Automotive Embedded Software Engineer
 ## Abstract
 OTA update systems require precise coordination across distributed nodes. This article presents a formal state machine model for automotive OTA systems, including transitions, invariants, and correctness properties.
 
