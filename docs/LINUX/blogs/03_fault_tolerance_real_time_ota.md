@@ -4,6 +4,14 @@
 **Date:** May 2024
 
 **Author:** Automotive Embedded Software Engineer
+## Abstract
+
+Automotive Over-The-Air (OTA) update systems operate under a unique combination of distributed coordination and real-time safety constraints. Unlike cloud-based systems, OTA mechanisms in vehicles must ensure correctness and reliability in the presence of resource limitations, safety-critical requirements, and strict timing guarantees.
+
+This article examines fault tolerance and real-time constraints in automotive OTA systems through a system-level perspective. We analyze failure types, recovery strategies, and consistency challenges across distributed components, while considering the impact of operating system behavior and execution timing.
+
+The goal is to highlight how reliable OTA systems can be designed by integrating distributed systems principles with real-time system constraints, ensuring safe and predictable behavior under failure conditions.
+
 ## 1. Problem Statement
 
 Unlike cloud systems, automotive systems must handle:
