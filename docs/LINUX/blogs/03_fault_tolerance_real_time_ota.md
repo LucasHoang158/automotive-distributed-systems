@@ -1,4 +1,9 @@
 # Fault Tolerance and Real-Time Constraints in Automotive OTA Systems
+**Tags:** `QNX` `Android` `Automotive` `Middleware` `Inter-OS Communication` `Security` `Real-Time` `System Integration`
+
+**Date:** May 2024
+
+**Author:** Automotive Embedded Software Engineer
 ## 1. Problem Statement
 
 Unlike cloud systems, automotive systems must handle:
