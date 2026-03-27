@@ -1,8 +1,3 @@
-# 🧠 Blog 1
-
-## automotive_as_distributed_system.md
-
-````md
 # Automotive Systems as Distributed Systems: A Formal Perspective
 
 ## Abstract
@@ -25,7 +20,7 @@ We study a system comprising nodes {HU1, HU3, HMI} interacting via CAN (low-leve
 - **HU3**: execution node (download + installation)
 - **HMI**: observer/controller (user-triggered actions)
 
-We define the system as a tuple:
+We define the system as:
 
 \[
 \mathcal{S} = (N, C, \Sigma, T)
@@ -42,80 +37,86 @@ Where:
 ### 2.2 Communication Channels
 
 **CAN (deterministic bus)**
-- bounded latency, broadcast semantics
-- limited payload, prioritized arbitration
+- bounded latency
+- broadcast semantics
+- limited payload
 
-**RSI/REST (service layer)**
-- request/response, stateless interactions
+**RSI / REST**
+- service-oriented abstraction
+- request/response
 
-**WebSocket (event stream)**
-- push-based updates, pub/sub semantics
+**WebSocket**
+- event-driven communication
+- push-based updates
 
 ---
 
 ## 3. Formal State Representation
 
-Let each node \(n_i \in N\) maintain a local state \(s_i \in \Sigma_i\).
+Each node \( n_i \in N \) maintains a local state \( s_i \in \Sigma_i \)
 
-The **global state** is:
+Global state:
+
 \[
 \Sigma = \Sigma_{HU1} \times \Sigma_{HU3} \times \Sigma_{HMI}
 \]
 
-Consistency requires:
+Consistency condition:
+
 \[
 \forall i,j: f(s_i) = f(s_j)
 \]
-for a projection \(f\) over update status.
+
+Where \( f \) is a projection over update state.
 
 ---
 
 ## 4. Consistency Model
 
-We consider two models:
-
 ### Strong Consistency
-- All nodes observe identical state simultaneously
-- Not feasible due to network delays and asynchronous execution
+- All nodes observe identical state instantly
+- Not feasible in automotive systems
 
-### Eventual Consistency (adopted)
-- Nodes converge to a consistent state over time
+### Eventual Consistency (Adopted)
+- Nodes converge over time
+- Temporary inconsistency is allowed
 
 **Implication:**
-- Temporary divergence is allowed
 - System must guarantee convergence
+- Requires validation mechanisms
 
 ---
 
 ## 5. Failure Model
 
-We define failures as:
+We consider:
 
-- **Crash faults**: node stops responding (HU3 reboot)
+- **Crash faults**: node stops (HU3 reboot)
 - **Omission faults**: lost CAN messages
-- **Timing faults**: delayed updates (network jitter)
+- **Timing faults**: delayed communication
 
-We assume:
-- no Byzantine behavior
-- bounded message delay
+Assumptions:
+- no Byzantine faults
+- bounded delay
 
 ---
 
 ## 6. Invariants (Safety Properties)
 
-We define key invariants:
+1. No installation before download completes:
 
-1. **No Install Before Download**
 \[
-\neg (state = INSTALLING \land \text{download\_complete} = false)
+\neg (INSTALLING \land \text{download_complete} = false)
 \]
 
-2. **Single Active Update**
+2. Single active update:
+
 \[
-\forall t: |active\_updates(t)| \le 1
+\forall t: |active_updates(t)| \le 1
 \]
 
-3. **Monotonic Progress (except failure)**
+3. Monotonic progression:
+
 \[
 state_{t+1} \ge state_t
 \]
@@ -135,8 +136,7 @@ graph TD
     CS --> HU3
     HU3 -->|RSI| HMI
     HMI -->|User Action| HU3
-````
-
+```
 ---
 
 ## 8. Sequence (OTA Initiation)
@@ -170,5 +170,3 @@ sequenceDiagram
 Viewing automotive OTA systems as distributed systems provides a rigorous framework for reasoning about correctness, consistency, and reliability. This foundation enables formal verification and scalable system design for next-generation software-defined vehicles.
 
 ````
-
----
