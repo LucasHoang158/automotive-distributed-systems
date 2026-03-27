@@ -35,14 +35,14 @@ This post shares practical lessons and design patterns from building a generic, 
 ---
 
 ## Architecture Overview
-
-+-------------------+         IPC/Transport         +-------------------+
+```bash
++-------------------+         IPC/Transport        +-------------------+
 |   QNX RTOS Side   | <--------------------------> |   Android Side    |
 |-------------------|                              |-------------------|
 |  service_A        |   <--- Protocol Layer --->   |  service_B        |
 |  service_B        |                              |  service_C        |
 +-------------------+                              +-------------------+
-
+```
 - *Protocol Layer:* Defines message formats, serialization, and validation
 - *Transport:* Typically Unix domain sockets, shared memory with ring buffer, or virtual serial (depending on hardware)
 - *Service abstraction:* Each logical function (e.g., camera, status, control) is a service with its own message types
@@ -77,7 +77,7 @@ This post shares practical lessons and design patterns from building a generic, 
 ---
 
 ## Example: Generic Message Structure (Pseudocode)
-
+```bash
 struct MessageHeader {
     uint32_t magic;
     uint16_t version;
@@ -90,7 +90,7 @@ struct Message {
     MessageHeader header;
     uint8_t payload[length];
 };
-
+```
 ---
 
 ## Testing and Fault Injection
@@ -114,27 +114,20 @@ struct Message {
 
 ---
 
-## Author's Anecdote & Snapshot (anonymized)
+## Author's Anecdote & Snapshot
 
 
-During integration we encountered intermittent frame drops when the Android-side UI became busy. Tracing showed the transport buffer was being starved by an expensive UI thread wake-up. We solved this by adding backpressure signaling and a small, fixed-size ring buffer on the QNX side; a short anonymized log excerpt below helped show the timing relationship that led to buffer starvation.
+During integration we encountered intermittent frame drops when the Android-side UI became busy. Tracing showed the transport buffer was being starved by an expensive UI thread wake-up. We solved this by adding backpressure signaling and a small, fixed-size ring buffer on the QNX side; a short log excerpt below helped show the timing relationship that led to buffer starvation.
 
 For tests I used a prototype board (SoC-Y) and a simple bench script tools/flow_test.sh --frames 5000. The ring buffer chosen was 64 KB and we measured fewer drops at 30 fps after the change. I ran the bench three times to be sure. We were surprised how small the buffer needed to be. It helped a lot.
 
-Design tradeoff note (real debugging): we first tried a shared-memory transport for lower copy cost. In practice we saw occasional stalls when the Android side GC paused. We switched to Unix domain sockets + a small ring buffer plus backpressure. The bench output (anonymized) showed drops fall from many to single digits.
+Design tradeoff note (real debugging): we first tried a shared-memory transport for lower copy cost. In practice we saw occasional stalls when the Android side GC paused. We switched to Unix domain sockets + a small ring buffer plus backpressure. The bench output  showed drops fall from many to single digits.
 
-Quick bench snippet (anonymized):
-
-# ./tools/flow_test.sh --frames 5000 --runner bench1
-# Result (summary): frame_drops: 120 -> 7 after change
+# Result (summary):
 
 I remember debugging this late at night. Not fun, but it worked.
 
-An anonymized commit (hash truncated) that introduced the ring buffer and backpressure protocol:
-
-commit f4e5d6a7... (anonymized)
-Author: Integration Engineer <anon@example.com>
-Date: 2026-02-22
+A commit that introduced the ring buffer and backpressure protocol:
 
     Add bounded ring buffer and backpressure handshake for QNX<->Android transport
 
@@ -143,12 +136,9 @@ Date: 2026-02-22
     - Update Android client to honor flow-control
 
 
-Caption: Anonymized commit adding flow-control to the inter-OS transport.
+Caption: Commit adding flow-control to the inter-OS transport.
 
 "We fixed frame drops with a small ring buffer. It worked when tested." 
-
-
-![Interface placeholder](images/interface_diagram.svg)
 
 ---
 
